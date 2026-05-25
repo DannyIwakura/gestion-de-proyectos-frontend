@@ -1,11 +1,26 @@
-# NavBar.vue
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuth } from '../composables/useAuth'
+
+const { user, logout } = useAuth()
+const router = useRouter()
 
 const menuAbierto = ref(false)
 
 const toggleMenu = () => {
   menuAbierto.value = !menuAbierto.value
+}
+
+const avatarLetter = computed(() => {
+  const nombre = user.value?.nombre
+  if (nombre) return nombre.charAt(0).toUpperCase()
+  return 'U'
+})
+
+function handleLogout() {
+  logout()
+  router.push('/login')
 }
 </script>
 
@@ -13,7 +28,6 @@ const toggleMenu = () => {
   <header class="navbar">
     <div class="navbar-container">
 
-      <!-- Logo / Nombre -->
       <div class="navbar-brand">
         <div class="logo">
           GP
@@ -25,12 +39,10 @@ const toggleMenu = () => {
         </div>
       </div>
 
-      <!-- Botón móvil -->
       <button class="mobile-button" @click="toggleMenu">
         ☰
       </button>
 
-      <!-- Navegación -->
       <nav :class="['navbar-links', { open: menuAbierto }]">
 
         <RouterLink to="/" class="nav-link">
@@ -51,16 +63,21 @@ const toggleMenu = () => {
 
       </nav>
 
-      <!-- Usuario -->
       <div class="navbar-user">
-        <div class="user-avatar">
-          D
-        </div>
+        <RouterLink to="/perfil" class="user-info-link">
+          <div class="user-avatar">
+            {{ avatarLetter }}
+          </div>
 
-        <div class="user-info">
-          <span class="user-name">Administrador</span>
-          <span class="user-role">ADMIN</span>
-        </div>
+          <div class="user-info">
+            <span class="user-name">{{ user?.nombre || 'Usuario' }}</span>
+            <span class="user-role">{{ user?.role || '—' }}</span>
+          </div>
+        </RouterLink>
+
+        <button class="logout-btn" @click="handleLogout" title="Cerrar sesión">
+          Salir
+        </button>
       </div>
 
     </div>
@@ -69,33 +86,24 @@ const toggleMenu = () => {
 
 <style scoped>
 
-/* ===== NAVBAR ===== */
-
 .navbar {
   background-color: #1e293b;
   color: white;
-
   position: sticky;
   top: 0;
   z-index: 1000;
-
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-container {
   max-width: 1400px;
-
   margin: 0 auto;
   padding: 0 2rem;
-
   height: 72px;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-
-/* ===== BRAND ===== */
 
 .navbar-brand {
   display: flex;
@@ -106,15 +114,11 @@ const toggleMenu = () => {
 .logo {
   width: 42px;
   height: 42px;
-
   border-radius: 12px;
-
   background: linear-gradient(135deg, #3b82f6, #2563eb);
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-weight: bold;
   font-size: 1rem;
 }
@@ -135,8 +139,6 @@ const toggleMenu = () => {
   color: #cbd5e1;
 }
 
-/* ===== LINKS ===== */
-
 .navbar-links {
   display: flex;
   align-items: center;
@@ -145,15 +147,10 @@ const toggleMenu = () => {
 
 .nav-link {
   color: #e2e8f0;
-
   text-decoration: none;
-
   padding: 0.7rem 1rem;
-
   border-radius: 10px;
-
   transition: all 0.2s ease;
-
   font-size: 0.95rem;
   font-weight: 500;
 }
@@ -168,26 +165,28 @@ const toggleMenu = () => {
   color: white;
 }
 
-/* ===== USER ===== */
-
 .navbar-user {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
+.user-info-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: inherit;
+}
+
 .user-avatar {
   width: 40px;
   height: 40px;
-
   border-radius: 50%;
-
   background-color: #2563eb;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-weight: bold;
 }
 
@@ -206,29 +205,36 @@ const toggleMenu = () => {
   color: #cbd5e1;
 }
 
-/* ===== MOBILE ===== */
+.logout-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
 
 .mobile-button {
   display: none;
-
   background: none;
   border: none;
-
   color: white;
-
   font-size: 1.5rem;
-
   cursor: pointer;
 }
-
-/* ===== RESPONSIVE ===== */
 
 @media (max-width: 768px) {
 
   .navbar-container {
     padding: 1rem;
     height: auto;
-
     flex-wrap: wrap;
   }
 
@@ -238,13 +244,11 @@ const toggleMenu = () => {
 
   .navbar-links {
     width: 100%;
-
     display: none;
-
     flex-direction: column;
     align-items: flex-start;
-
     margin-top: 1rem;
+    order: 3;
   }
 
   .navbar-links.open {

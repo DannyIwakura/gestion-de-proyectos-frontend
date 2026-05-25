@@ -1,7 +1,7 @@
 # DashboardView.vue
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import api from '../services/api'
 
 const proyectos = ref([])
 const loading = ref(true)
@@ -13,7 +13,7 @@ const filtroTecnologia = ref('TODAS')
 
 const obtenerProyectos = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/api/public/proyectos')
+    const response = await api.get('/public/proyectos')
 
     proyectos.value = response.data
   }
